@@ -15,3 +15,17 @@ reporting_task:
     A fully fledged report with the main topics, each with a full section of information.
     Formatted as markdown without '```'
   agent: reporting_analyst
+
+strategy_task:
+  description: >
+    As an Online Security & Privacy Strategist, design a prioritized OSINT search
+    strategy to uncover potentially sensitive public information related to {topic}.
+    Focus on PII exposure (emails, phones, addresses), leaked credentials/tokens,
+    sensitive documents (resumes, spreadsheets), and doxxing threats. Only use
+    publicly accessible sources. Provide a JSON with fields: prioritized_queries,
+    risk_focus, include_domains, exclude_domains, query_limit, per_query_result_limit.
+  expected_output: >
+    A valid JSON object with keys: "prioritized_queries" (array of strings),
+    "risk_focus" (array), "include_domains" (array), "exclude_domains" (array),
+    "query_limit" (integer), "per_query_result_limit" (integer), and brief "notes".
+  agent: security_strategist

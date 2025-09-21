@@ -33,13 +33,22 @@ class Dfa():
             verbose=True
         )
 
+    @agent
+    def security_strategist(self) -> Agent:
+        return Agent(
+            config=self.agents_config['security_strategist'],  # type: ignore[index]
+            verbose=True
+        )
+
     # To learn more about structured task outputs,
     # task dependencies, and task callbacks, check out the documentation:
     # https://docs.crewai.com/concepts/tasks#overview-of-a-task
     @task
     def research_task(self) -> Task:
+        # Make the research depend on the strategy output
         return Task(
-            config=self.tasks_config['research_task'], # type: ignore[index]
+            config=self.tasks_config['research_task'],  # type: ignore[index]
+            context=[self.strategy_task()],
         )
 
     @task
@@ -47,6 +56,12 @@ class Dfa():
         return Task(
             config=self.tasks_config['reporting_task'], # type: ignore[index]
             output_file='report.md'
+        )
+
+    @task
+    def strategy_task(self) -> Task:
+        return Task(
+            config=self.tasks_config['strategy_task'],  # type: ignore[index]
         )
 
     @crew
