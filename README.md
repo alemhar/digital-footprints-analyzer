@@ -1,55 +1,64 @@
-# Dfa Crew
+# Digital Footprint Analyzer
 
-Welcome to the Dfa Crew project, powered by [crewAI](https://crewai.com). This template is designed to help you set up a multi-agent AI system with ease, leveraging the powerful and flexible framework provided by crewAI. Our goal is to enable your agents to collaborate effectively on complex tasks, maximizing their collective intelligence and capabilities.
+Strategist‑led, human‑in‑the‑loop OSINT UI that investigates a subject’s public digital footprint. The app shows the strategist’s current instruction (what to search and why), then reveals findings one‑by‑one when you click Continue. Designed to keep AI token usage under control.
+
+## Features
+- Strategist proposes a short, prioritized plan with rationale (visible on screen)
+- Continue button executes each step and paginates findings one‑at‑a‑time
+- Token‑aware by design: brief plan uses minimal tokens; searches/analysis are lightweight
+- Hacker‑style, two‑pane UI (left: inputs; right: outputs)
+
+## Requirements
+- Python 3.10 – 3.13
+- A `.env` file with:
+  - `SERPER_API_KEY` (required for web search)
+  - Azure OpenAI (for the strategist plan):
+    - `AZURE_OPENAI_API_KEY`
+    - `AZURE_OPENAI_ENDPOINT` (e.g., https://<resource>.openai.azure.com/)
+    - `OPENAI_API_VERSION` (e.g., 2023-05-15 or your deployment’s supported version)
+    - `OPENAI_ENGINE` (your Azure deployment name, e.g., gpt-4)
 
 ## Installation
-
-Ensure you have Python >=3.10 <3.14 installed on your system. This project uses [UV](https://docs.astral.sh/uv/) for dependency management and package handling, offering a seamless setup and execution experience.
-
-First, if you haven't already, install uv:
-
 ```bash
-pip install uv
+pip install -U pip
+python -m venv .venv
+.\.venv\Scripts\activate
+pip install -e .
 ```
 
-Next, navigate to your project directory and install the dependencies:
-
-(Optional) Lock the dependencies and install them by using the CLI command:
+## Run the UI
 ```bash
-crewai install
+.\.venv\Scripts\python run_ui.py
 ```
-### Customizing
+Then open the local URL shown in the terminal.
 
-**Add your `OPENAI_API_KEY` into the `.env` file**
+## Using the App
+1. Enter inputs on the left:
+   - Full Name; optional LinkedIn/Twitter/Facebook/Instagram/GitHub/Website
+   - Usernames/handles; Location hint
+2. Click `Start Audit`:
+   - You’ll see “Generating strategy plan…” then Strategy Step 1 (title, rationale, suggested queries)
+3. Click `Continue`:
+   - You’ll see “Running searches…” then Finding 1 of N for that step
+   - Click `Continue` to paginate findings; when finished, the next Strategy Step appears
 
-- Modify `src/dfa/config/agents.yaml` to define your agents
-- Modify `src/dfa/config/tasks.yaml` to define your tasks
-- Modify `src/dfa/crew.py` to add your own logic, tools and specific args
-- Modify `src/dfa/main.py` to add custom inputs for your agents and tasks
+## Token Control Philosophy
+- Minimal strategist tokens (short JSON plan)
+- Tokenless execution for search + heuristic analysis
+- Human‑in‑the‑loop gating with `Continue` prevents runaway costs
 
-## Running the Project
+## Troubleshooting Azure
+- “Resource not found” almost always means one of these is mismatched:
+  - `OPENAI_ENGINE` (must be your Azure Deployment name)
+  - `AZURE_OPENAI_ENDPOINT` (resource URL, correct region)
+  - `OPENAI_API_VERSION` (must be supported by the deployed model)
+- Verify in Azure Portal → your OpenAI resource → Deployments.
 
-To kickstart your crew of AI agents and begin task execution, run this from the root folder of your project:
+## Repository Structure (high level)
+- `src/dfa/ui_app.py` — Gradio UI, strategist plan generation, finder, analyzer, step‑by‑step flow
+- `src/dfa/crew.py` — Crew/agents definition (LLM client injection for robustness)
+- `src/dfa/config/` — Task and agent prompts/config
+- `check_azure_openai.py` — Minimal sanity test for Azure OpenAI env
 
-```bash
-$ crewai run
-```
-
-This command initializes the dfa Crew, assembling the agents and assigning them tasks as defined in your configuration.
-
-This example, unmodified, will run the create a `report.md` file with the output of a research on LLMs in the root folder.
-
-## Understanding Your Crew
-
-The dfa Crew is composed of multiple AI agents, each with unique roles, goals, and tools. These agents collaborate on a series of tasks, defined in `config/tasks.yaml`, leveraging their collective skills to achieve complex objectives. The `config/agents.yaml` file outlines the capabilities and configurations of each agent in your crew.
-
-## Support
-
-For support, questions, or feedback regarding the Dfa Crew or crewAI.
-- Visit our [documentation](https://docs.crewai.com)
-- Reach out to us through our [GitHub repository](https://github.com/joaomdmoura/crewai)
-- [Join our Discord](https://discord.com/invite/X4JWnZnxPb)
-- [Chat with our docs](https://chatg.pt/DWjSBZn)
-
-Let's create wonders together with the power and simplicity of crewAI.
-"# digital-footprints-analyzer" 
+---
+Build thoughtfully: show the strategist’s thinking, execute deliberately, control spend.
