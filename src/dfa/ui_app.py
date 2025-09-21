@@ -900,62 +900,110 @@ def check_azure_connection():
 
 
 def build_ui():
-    with gr.Blocks(title="Digital Footprint Analyzer - Input Form") as demo:
+    hacker_css = """
+    /* Base dark background */
+    html, body, .gradio-container { background: #0b0f0a !important; color: #baf7c6 !important; }
+    /* Panels and blocks */
+    .gr-block, .gr-panel, .gr-column, .gr-row, .gr-group, .wrap, .form { background: transparent !important; }
+    .block, .form, .row { background: transparent !important; }
+    .hacker-pane { border: 1px solid #1f3b20; background: #0e130f !important; box-shadow: 0 0 12px rgba(56,240,88,0.15) inset; }
+    /* Titles and text */
+    .hacker-title h1 { color: #38f058 !important; font-family: 'Courier New', monospace; text-shadow: 0 0 10px #38f058; }
+    .status-bar { color: #6de58a !important; font-family: 'Courier New', monospace; }
+    .gradio-container, .gradio-container * { font-family: 'Courier New', monospace; }
+    /* Markdown/prose */
+    .gr-markdown, .prose, .prose * { color: #baf7c6 !important; }
+    .gr-markdown pre, .gr-markdown code, pre, code { background: #0b120d !important; color: #9cf3ad !important; border: 1px solid #1f3b20 !important; }
+    .gr-markdown a, .prose a { color: #38f058 !important; text-decoration-color: rgba(56,240,88,0.6) !important; }
+    /* Inputs */
+    input[type=text], input[type=url], input[type=search], textarea, select { background: #0b120d !important; color: #baf7c6 !important; border: 1px solid #1f3b20 !important; }
+    .gr-textbox, .gr-textarea, .gr-input, .gr-select, .gr-number, .gr-text { background: transparent !important; }
+    /* Force dark on Gradio label/container wrappers */
+    label.container, label.container .input-container { background: #0e130f !important; border-color: #1f3b20 !important; box-shadow: none !important; }
+    label.container.show_textbox_border { background: #0e130f !important; border: 1px solid #1f3b20 !important; }
+    .input-container textarea, .input-container input { background: #0b120d !important; color: #baf7c6 !important; }
+    .input-container textarea::placeholder, .input-container input::placeholder { color: rgba(109,229,138,0.65) !important; }
+    /* Buttons */
+    .gr-button { background: #102114 !important; border: 1px solid #38f058 !important; color: #baf7c6 !important; }
+    .gr-button:hover { background: #16301c !important; }
+    /* Tabs (if any) */
+    .tabs, .tabitem, .tabitem.selected { background: #0e130f !important; border-color: #1f3b20 !important; }
+    /* Scrollbars */
+    ::-webkit-scrollbar { width: 10px; height: 10px; }
+    ::-webkit-scrollbar-track { background: #0b0f0a; }
+    ::-webkit-scrollbar-thumb { background: #16301c; border: 1px solid #1f3b20; }
+    ::-webkit-scrollbar-thumb:hover { background: #1f2c22; }
+    /* Split layout */
+    .split { display: grid; grid-template-columns: 1fr 1.25fr; gap: 14px; }
+    .soft-sep { height: 1px; background: linear-gradient(90deg, rgba(56,240,88,0.0), rgba(56,240,88,0.35), rgba(56,240,88,0.0)); margin: 8px 0; }
+    """
+
+    with gr.Blocks(title="Digital Footprint Analyzer", css=hacker_css) as demo:
         gr.Markdown("""
         # Digital Footprint Analyzer
-        Enter your details below to begin. This first step only validates inputs.
-        """)
+        """, elem_classes=["hacker-title"])
 
-        with gr.Row():
-            full_name = gr.Textbox(label="Full Name", placeholder="e.g., Jane Doe", lines=1)
-            linkedin_url = gr.Textbox(label="LinkedIn Profile URL (optional)", placeholder="https://www.linkedin.com/in/username", lines=1)
-            facebook_url = gr.Textbox(label="Facebook Profile URL (optional)", placeholder="https://www.facebook.com/username", lines=1)
+        with gr.Row(elem_classes=["split"]):
+            # Left: Inputs
+            with gr.Column(elem_classes=["hacker-pane"]):
+                gr.Markdown("Inputs", elem_classes=["status-bar"])
+                with gr.Row():
+                    full_name = gr.Textbox(label="Full Name", placeholder="e.g., Jane Doe", lines=1)
+                    linkedin_url = gr.Textbox(label="LinkedIn URL", placeholder="https://www.linkedin.com/in/username", lines=1)
+                with gr.Row():
+                    facebook_url = gr.Textbox(label="Facebook URL", placeholder="https://www.facebook.com/username", lines=1)
+                    twitter_url = gr.Textbox(label="Twitter/X URL", placeholder="https://twitter.com/username", lines=1)
+                with gr.Row():
+                    instagram_url = gr.Textbox(label="Instagram URL", placeholder="https://www.instagram.com/username", lines=1)
+                    github_url = gr.Textbox(label="GitHub URL", placeholder="https://github.com/username", lines=1)
+                with gr.Row():
+                    website_url = gr.Textbox(label="Website", placeholder="https://example.com", lines=1)
+                    usernames = gr.Textbox(
+                        label="Usernames / Handles",
+                        placeholder="Comma-separated, e.g., @jdoe, j_doe, john.doe",
+                        info="X/Twitter, Instagram, GitHub, Reddit, YouTube, TikTok, Medium, Kaggle, Stack Overflow, etc.",
+                        lines=1,
+                    )
+                location_hint = gr.Textbox(
+                    label="Location hint",
+                    placeholder="City, Country (e.g., Manila, Philippines)",
+                    lines=1,
+                )
+                with gr.Row():
+                    start_audit_btn = gr.Button("Start Audit")
+                    continue_btn = gr.Button("Continue")
+                    # azure_check_btn = gr.Button("Check Azure Connection")
 
-        with gr.Row():
-            twitter_url = gr.Textbox(label="Twitter/X URL (optional)", placeholder="https://twitter.com/handle", lines=1)
-            instagram_url = gr.Textbox(label="Instagram URL (optional)", placeholder="https://www.instagram.com/username", lines=1)
-
-        with gr.Row():
-            github_url = gr.Textbox(label="GitHub URL (optional)", placeholder="https://github.com/username", lines=1)
-            website_url = gr.Textbox(label="Personal Website (optional)", placeholder="https://yourdomain.com", lines=1)
-
-        with gr.Row():
-            usernames = gr.Textbox(
-                label="Usernames/handles (optional)",
-                placeholder="Comma-separated, e.g., @jdoe, j_doe, john.doe",
-                info="Examples from: X/Twitter, Instagram, GitHub, Reddit, YouTube, TikTok, Medium, Kaggle, Stack Overflow, etc.",
-                lines=1,
-            )
-            location_hint = gr.Textbox(
-                label="Location hint (optional)",
-                placeholder="City, Country (e.g., Manila, Philippines)",
-                lines=1,
-            )
-
-        start_audit_btn = gr.Button("Start Audit")
-        continue_btn = gr.Button("Continue")
-        azure_check_btn = gr.Button("Check Azure Connection")
-        review_md = gr.Markdown(label="Finding Review")
-        azure_md = gr.Markdown(label="Azure Connectivity")
+            # Right: Outputs
+            with gr.Column(elem_classes=["hacker-pane"]):
+                gr.Markdown("Output", elem_classes=["status-bar"])
+                review_md = gr.Markdown(label="Finding Review")
+                gr.HTML('<div class="soft-sep"></div>')
+                azure_md = gr.Markdown(label="Azure Connectivity")
+        
         review_state = gr.State({"items": [], "index": 0})
 
         start_audit_btn.click(
             fn=start_review,
             inputs=[full_name, linkedin_url, facebook_url, twitter_url, instagram_url, github_url, website_url, usernames, location_hint, review_state],
             outputs=[review_md, review_state],
+        ).then(
+            None, None, None, show_progress=True
         )
 
         continue_btn.click(
             fn=next_finding,
             inputs=[review_state],
             outputs=[review_md, review_state],
+        ).then(
+            None, None, None, show_progress=True
         )
 
-        azure_check_btn.click(
-            fn=check_azure_connection,
-            inputs=[],
-            outputs=[azure_md],
-        )
+        # azure_check_btn.click(
+        #     fn=check_azure_connection,
+        #     inputs=[],
+        #     outputs=[azure_md],
+        # )
 
     return demo
 
