@@ -20,10 +20,27 @@ strategy_task:
   description: >
     As an Online Security & Privacy Strategist, design a prioritized OSINT search
     strategy to uncover potentially sensitive public information related to {topic}.
-    Focus on PII exposure (emails, phones, addresses), leaked credentials/tokens,
-    sensitive documents (resumes, spreadsheets), and doxxing threats. Only use
-    publicly accessible sources. Provide a JSON with fields: prioritized_queries,
-    risk_focus, include_domains, exclude_domains, query_limit, per_query_result_limit.
+    Use the following optional inputs to tailor the plan and improve disambiguation:
+    - LinkedIn: {linkedin_url}
+    - Facebook: {facebook_url}
+    - Twitter/X: {twitter_url}
+    - Instagram: {instagram_url}
+    - GitHub: {github_url}
+    - Personal website: {website_url}
+    - Usernames/handles (comma-separated): {usernames}
+    - Location hint: {location_hint}
+
+    Focus areas include exposed PII (emails, phone numbers, addresses), leaked
+    credentials/tokens/API keys, sensitive documents (resumes, spreadsheets), and
+    doxxing threats. Only use publicly accessible sources. Incorporate site: filters
+    and, when helpful, filetype: filters (pdf, doc, xls, csv, txt) and keywords such as
+    resume/CV, contact, email, phone, address, leak, token, password. Where provided
+    profile URLs exist, leverage them as anchors for identity disambiguation and to
+    derive additional queries (e.g., handle-based searches on other platforms).
+
+    Provide clear, concise query strings and avoid duplication. Suggest includes/excludes
+    for domains to reduce noise (e.g., prioritize linkedin.com/in for identity grounding,
+    deprioritize generic aggregators unless risk signals are present).
   expected_output: >
     A valid JSON object with keys: "prioritized_queries" (array of strings),
     "risk_focus" (array), "include_domains" (array), "exclude_domains" (array),
