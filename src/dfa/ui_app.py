@@ -482,7 +482,7 @@ def run_full_crew(
         else:
             # assign for subsequent calls
             globals()["Dfa"] = _Dfa
-            
+
     if not os.getenv("OPENAI_API_KEY"):
         # Try Azure OpenAI fallback
         az_key = os.getenv("AZURE_OPENAI_API_KEY")
@@ -516,6 +516,47 @@ def run_full_crew(
                 "No OPENAI_API_KEY found. For Azure, set AZURE_OPENAI_API_KEY, AZURE_OPENAI_ENDPOINT, "
                 "OPENAI_API_VERSION, and OPENAI_ENGINE (deployment name)."
             )
+
+    # Prepare inputs expected by YAML / crew
+    resolved_model = (
+        os.getenv("OPENAI_ENGINE")
+        or os.getenv("OPENAI_MODEL_NAME")
+        or os.getenv("MODEL")
+        or "gpt-4"
+    )
+    inputs = {
+        "topic": (full_name or "").strip() or "Unknown Subject",
+        "current_year": str(datetime.now().year),
+        "model": resolved_model,
+        # Additional context not used by YAML by default but can be referenced later
+        "linkedin_url": (linkedin_url or "").strip(),
+        "facebook_url": (facebook_url or "").strip(),
+        "twitter_url": (twitter_url or "").strip(),
+        "instagram_url": (instagram_url or "").strip(),
+        "github_url": (github_url or "").strip(),
+        "website_url": (website_url or "").strip(),
+        "usernames": (usernames or "").strip(),
+        "location_hint": (location_hint or "").strip(),
+    }
+
+    # Emit debug info to help diagnose model routing
+    debug = (
+        "### Crew Debug\n"
+        f"- Resolved model (inputs.model): `{inputs['model']}`\n"
+        f"- OPENAI_ENGINE: `{os.getenv('OPENAI_ENGINE')}`\n"
+        f"- OPENAI_API_BASE: `{os.getenv('OPENAI_API_BASE')}`\n"
+        f"- OPENAI_BASE_URL: `{os.getenv('OPENAI_BASE_URL')}`\n"
+        f"- OPENAI_API_VERSION: `{os.getenv('OPENAI_API_VERSION')}`\n"
+        f"- OPENAI_API_TYPE: `{os.getenv('OPENAI_API_TYPE')}`\n"
+    )
+
+    try:
+        result = Dfa().crew().kickoff(inputs=inputs)
+    except Exception as e:
+        return debug + "\n\n" + f"### Error\n{e}"
+
+    # crewAI may return rich objects; cast to string for display
+    return debug + "\n\n" + f"## Crew Output\n\n{result}"
 
 def _flatten_analysis(analysis: dict) -> list:
     grouped = analysis.get("grouped", {}) or {}
@@ -972,7 +1013,8 @@ def build_ui():
                 with gr.Row():
                     start_audit_btn = gr.Button("Start Audit")
                     continue_btn = gr.Button("Continue")
-                    # azure_check_btn = gr.Button("Check Azure Connection")
+                    run_full_crew_btn = gr.Button("Run Full Crew")
+                    azure_check_btn = gr.Button("Check Azure Connection")
 
             # Right: Outputs
             with gr.Column(elem_classes=["hacker-pane"]):
@@ -999,11 +1041,19 @@ def build_ui():
             None, None, None, show_progress=True
         )
 
-        # azure_check_btn.click(
-        #     fn=check_azure_connection,
-        #     inputs=[],
-        #     outputs=[azure_md],
-        # )
+        run_full_crew_btn.click(
+            fn=run_full_crew,
+            inputs=[full_name, linkedin_url, facebook_url, twitter_url, instagram_url, github_url, website_url, usernames, location_hint],
+            outputs=[review_md],
+        ).then(
+            None, None, None, show_progress=True
+        )
+
+        azure_check_btn.click(
+            fn=check_azure_connection,
+            inputs=[],
+            outputs=[azure_md],
+        )
 
     return demo
 

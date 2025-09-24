@@ -59,10 +59,11 @@ class Dfa():
         # Normalize endpoint without trailing slash
         endpoint = endpoint.rstrip("/")
         return AzureChatOpenAI(
-            model=deployment,
-            temperature=0.1,
+            azure_deployment=deployment,
+            api_version=version,
             azure_endpoint=endpoint,
             openai_api_key=api_key,
+            temperature=0.1,
             max_retries=0,
             request_timeout=60,
         )
